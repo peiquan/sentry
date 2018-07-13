@@ -53,6 +53,7 @@ class VstsIntegration(Integration, RepositoryMixin, VstsIssueSync):
                 'name': repo['name'],
                 'full_name': repo['id'],  # TODO(lb): uhhh???? there is no full name
             })
+        return data
 
     def get_client(self):
         if self.default_identity is None:
