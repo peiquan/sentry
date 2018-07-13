@@ -19,7 +19,8 @@ class VstsApiPath(object):
     commits_batch = u'https://{account_name}/DefaultCollection/_apis/git/repositories/{repo_id}/commitsBatch'
     commits_changes = u'https://{account_name}/DefaultCollection/_apis/git/repositories/{repo_id}/commits/{commit_id}/changes'
     projects = u'https://{account_name}/DefaultCollection/_apis/projects'
-    repositories = u'https://{account_name}/DefaultCollection/{project}_apis/git/repositories/{repo_id}'
+    repository = u'https://{account_name}/DefaultCollection/{project}_apis/git/repositories/{repo_id}'
+    repositories = u'https://{accountName}.visualstudio.com/{project}/_apis/git/repositories'
     work_items = u'https://{account_name}/DefaultCollection/_apis/wit/workitems/{id}'
     work_items_create = u'https://{account_name}/{project}/_apis/wit/workitems/${type}'
     work_items_types_states = u'https://{account_name}/{project}/_apis/wit/workitemtypes/{type}/states'
@@ -163,10 +164,18 @@ class VstsApiClient(ApiClient, OAuth2RefreshMixin):
 
     def get_repo(self, instance, name_or_id, project=None):
         return self.get(
-            VstsApiPath.repositories.format(
+            VstsApiPath.repository.format(
                 account_name=instance,
                 project='{}/'.format(project) if project else '',
                 repo_id=name_or_id,
+            ),
+        )
+
+    def get_repos(self, instance, project=None):
+        return self.get(
+            VstsApiPath.repositories.format(
+                account_name=instance,
+                project='{}/'.format(project) if project else '',
             ),
         )
 

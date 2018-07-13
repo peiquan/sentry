@@ -8,6 +8,7 @@ from django.utils.translation import ugettext as _
 from sentry import http
 from sentry.integrations import Integration, IntegrationFeatures, IntegrationProvider, IntegrationMetadata
 from sentry.integrations.exceptions import ApiError
+from sentry.integrations.repositories import RepositoryMixin
 from sentry.integrations.vsts.issues import VstsIssueSync
 from sentry.pipeline import NestedPipelineView
 from sentry.identity.pipeline import IdentityProviderPipeline
@@ -31,12 +32,24 @@ metadata = IntegrationMetadata(
 )
 
 
-class VstsIntegration(Integration, VstsIssueSync):
+class VstsIntegration(Integration, RepositoryMixin, VstsIssueSync):
     logger = logging.getLogger('sentry.integrations')
 
     def __init__(self, *args, **kwargs):
         super(VstsIntegration, self).__init__(*args, **kwargs)
         self.default_identity = None
+
+    def get_repositories(self):
+        try:
+            repos = self.get_client().get_repos(self.instance)
+        except ApiError:
+            repos = []
+        data = []
+        for repo in repos:
+            data.append({
+                'name': repo['name'],
+                'full_name': repo['id'],  # TODO(lb): uhhh???? there is no full name
+            })
 
     def get_client(self):
         if self.default_identity is None:
